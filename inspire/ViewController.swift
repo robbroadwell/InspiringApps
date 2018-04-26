@@ -11,11 +11,12 @@ import CoreData
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
+    private let url = URL(string: "http://dev.inspiringapps.com/Files/IAChallenge/30E02AAA-B947-4D4B-8FB6-9C57C43872A9/Apache.log")!
+    
     @IBOutlet weak var tableView: UITableView!
     
-    let url = URL(string: "http://dev.inspiringapps.com/Files/IAChallenge/30E02AAA-B947-4D4B-8FB6-9C57C43872A9/Apache.log")!
-    
-    var tableData: [NSManagedObject]!
+    private var tableData: [NSManagedObject]!
+    private var retryCount = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -76,7 +77,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             // get the .log file from the server
             let html = try String(contentsOf: url, encoding: .utf8)
             
-            // split it up by new lines
+            // split it up by new lines (\n)
             let lines = html.lines
             
             // core data context
@@ -86,6 +87,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             
             // iterate through the lines of the log file
             for row in lines {
+                
+                // split the elements apart
                 let split = row.split(separator: " ")
                 
                 // get the ip and page
@@ -108,7 +111,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     
                     let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Sequences")
                     
-                    // see if the sequence already exists
+                    // check if the sequence already exists
                     let pathPredicate1 = NSPredicate(format: "path_1 = %@", sequence[0])
                     let pathPredicate2 = NSPredicate(format: "path_2 = %@", sequence[1])
                     let pathPredicate3 = NSPredicate(format: "path_3 = %@", sequence[2])
@@ -125,7 +128,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                         }
                         
                     } else {
-                        // this sequence is a new one -> create new CoreData managed object
+                        // this sequence is new -> create a CoreData managed object
                         let newSequence = NSManagedObject(entity: entity!, insertInto: context)
                         
                         newSequence.setValue(sequence[0], forKey: "path_1")
@@ -140,6 +143,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 }
             }
             
+            // save all changes to the context en masse
             try context.save()
             
         } catch {
@@ -149,7 +153,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     // MARK:- CoreData
 
-    func purgeCoreData() {
+    /// Wipes all records from CoreData.
+    private func purgeCoreData() {
         
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         let context = appDelegate.persistentContainer.viewContext
@@ -168,7 +173,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
 
-    func loadSequences() {
+    /// Loads all sequences from CoreData for the TableView.
+    private func loadSequences() {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         let context = appDelegate.persistentContainer.viewContext
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Sequences")
@@ -183,9 +189,26 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-    func showTableView() {
-        tableView.reloadData()
-        tableView.isHidden = false
+    /// Reloads and displays the TableView.
+    private func showTableView() {
+        if tableData.count > 0 {
+            tableView.reloadData()
+            tableView.isHidden = false
+        } else {
+            retry()
+        }
+    }
+    
+    /// Attempts to retry the log file fetch request.
+    private func retry() {
+        if retryCount < 5 {
+            retryCount = retryCount + 1
+            fetchSequences()
+            loadSequences()
+            showTableView()
+        } else {
+            print("Please check your internet connection.")
+        }
     }
     
 }

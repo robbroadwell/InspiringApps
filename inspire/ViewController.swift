@@ -14,9 +14,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     private let url = URL(string: "http://dev.inspiringapps.com/Files/IAChallenge/30E02AAA-B947-4D4B-8FB6-9C57C43872A9/Apache.log")!
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var progressLabel: UILabel!
+    @IBOutlet weak var progressView: UIProgressView!
     
     private var tableData: [NSManagedObject]!
-    private var retryCount = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,15 +25,18 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         tableView.isHidden = true
         tableView.delegate = self
         tableView.dataSource = self
+        
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let context = appDelegate.persistentContainer.viewContext
+        
+        DispatchQueue.global(qos: .background).async {
+            self.fetchSequences(withContext: context)
+            
+            DispatchQueue.main.async {
+                self.loadSequences(withContext: context)
+            }
+        }
 
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        // delay these methods until the view hierarchy is built because they are synchronous
-        // and will prevent the UI from being built, i.e. the loading spinner from showing up
-        fetchSequences()
-        loadSequences()
-        showTableView()
     }
     
     // MARK:- TableView
@@ -67,10 +71,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     // MARK:- Networking / Data
 
-    func fetchSequences() {
+    func fetchSequences(withContext context: NSManagedObjectContext) {
+        
+        // private managed object context
+        let privateMOC = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        privateMOC.parent = context
+
+        let entity = NSEntityDescription.entity(forEntityName: "Sequences", in: context)
         
         // remove anything residual from CoreData
-        purgeCoreData()
+        purgeCoreData(context: privateMOC)
         
         // tracks active sequences for each IP, example:
         // ["192.168.1.1": ["/example/"]
@@ -87,19 +97,20 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             // split it up by new lines (\n)
             let lines = html.lines
             
-            // core data context
-            let appDelegate = UIApplication.shared.delegate as! AppDelegate
-            let context = appDelegate.persistentContainer.viewContext
-            let entity = NSEntityDescription.entity(forEntityName: "Sequences", in: context)
-            
             // iterate through the lines of the log file
-            for row in lines {
+            for (index, row) in lines.enumerated() {
+                
+                DispatchQueue.main.async {
+                    let progress = Float(index) / Float(lines.count)
+                    self.progressLabel.text = "Processed \(index) of \(lines.count) records."
+                    self.progressView.setProgress(progress, animated: false)
+                }
                 
                 // split the elements apart
                 let split = row.split(separator: " ")
                 
                 // get the ip and page
-                // TODO: this works, but could be better
+                // TODO: this works but could be better
                 let ip = String(split[0])
                 let path = String(split[6])
                 
@@ -126,7 +137,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     
                     request.predicate = predicate
                     request.returnsObjectsAsFaults = false
-                    let result = try context.fetch(request)
+                    let result = try privateMOC.fetch(request)
                     
                     if result.count > 0 {
                         // this sequence already exists -> increment the count
@@ -136,7 +147,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                         
                     } else {
                         // this sequence is new -> create a CoreData managed object
-                        let newSequence = NSManagedObject(entity: entity!, insertInto: context)
+                        let newSequence = NSManagedObject(entity: entity!, insertInto: privateMOC)
                         
                         newSequence.setValue(sequence[0], forKey: "path_1")
                         newSequence.setValue(sequence[1], forKey: "path_2")
@@ -147,11 +158,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     
                     // pop the first path from the sequence to continue tracking
                     sequences[ip]?.remove(at: 0)
+                    
                 }
             }
             
-            // save all changes to the context en masse
-            try context.save()
+            try privateMOC.save()
             
         } catch {
             print("Something went wrong.")
@@ -161,10 +172,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     // MARK:- CoreData
 
     /// Wipes all records from CoreData.
-    private func purgeCoreData() {
+    private func purgeCoreData(context: NSManagedObjectContext) {
         
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let context = appDelegate.persistentContainer.viewContext
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Sequences")
         request.returnsObjectsAsFaults = false
         
@@ -181,40 +190,22 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
 
     /// Loads all sequences from CoreData for the TableView.
-    private func loadSequences() {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let context = appDelegate.persistentContainer.viewContext
+    private func loadSequences(withContext context: NSManagedObjectContext) {
+
+        // core data fetch request
         let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Sequences")
         request.sortDescriptors = [NSSortDescriptor(key: "count", ascending: false)]
         request.returnsObjectsAsFaults = false
         
         do {
             tableData = try context.fetch(request) as! [NSManagedObject]
+            if self.tableData.count > 0 {
+                self.tableView.reloadData()
+                self.tableView.isHidden = false
+            }
             
         } catch {
             print("Something went wrong.")
-        }
-    }
-    
-    /// Reloads and displays the TableView.
-    private func showTableView() {
-        if tableData.count > 0 {
-            tableView.reloadData()
-            tableView.isHidden = false
-        } else {
-            retry()
-        }
-    }
-    
-    /// Attempts to retry the log file fetch request.
-    private func retry() {
-        if retryCount < 5 {
-            retryCount = retryCount + 1
-            fetchSequences()
-            loadSequences()
-            showTableView()
-        } else {
-            print("Please check your internet connection.")
         }
     }
     

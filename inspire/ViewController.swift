@@ -40,7 +40,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let data = tableData else { return UITableViewCell() }
         
-        let cell = UITableViewCell()
+        let cell = tableView.dequeueReusableCell(withIdentifier: "SequenceCell", for: indexPath) as! SequenceCell
         let sequence = data[indexPath.row]
         
         guard let count = sequence.value(forKey: "count") as? Int,
@@ -48,7 +48,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             let path2 = sequence.value(forKey: "path_2") as? String,
             let path3 = sequence.value(forKey: "path_3") as? String else { return UITableViewCell() }
         
-        cell.textLabel?.text = String(describing: count)
+        cell.scoreLabel.text = String(describing: count)
+        cell.path1Label.text = path1
+        cell.path2Label.text = path2
+        cell.path3Label.text = path3
         
         return cell
     }
@@ -56,6 +59,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let data = tableData else { return 0 }
         return data.count
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 75
     }
     
     // MARK:- Networking / Data

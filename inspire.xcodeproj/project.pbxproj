@@ -13,6 +13,7 @@
 		0ED604FB2091534200A4A81B /* inspire.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 0ED604F92091534200A4A81B /* inspire.xcdatamodeld */; };
 		0ED604FD2091534200A4A81B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0ED604FC2091534200A4A81B /* Assets.xcassets */; };
 		0ED605002091534200A4A81B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0ED604FE2091534200A4A81B /* LaunchScreen.storyboard */; };
+		0ED60508209187B300A4A81B /* SequenceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED60507209187B300A4A81B /* SequenceCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 		0ED604FC2091534200A4A81B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0ED604FF2091534200A4A81B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0ED605012091534200A4A81B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0ED60507209187B300A4A81B /* SequenceCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequenceCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 			children = (
 				0ED604F22091534200A4A81B /* AppDelegate.swift */,
 				0ED604F42091534200A4A81B /* ViewController.swift */,
+				0ED60507209187B300A4A81B /* SequenceCell.swift */,
 				0ED604F62091534200A4A81B /* Main.storyboard */,
 				0ED604FC2091534200A4A81B /* Assets.xcassets */,
 				0ED604FE2091534200A4A81B /* LaunchScreen.storyboard */,
@@ -141,6 +144,7 @@
 			files = (
 				0ED604FB2091534200A4A81B /* inspire.xcdatamodeld in Sources */,
 				0ED604F52091534200A4A81B /* ViewController.swift in Sources */,
+				0ED60508209187B300A4A81B /* SequenceCell.swift in Sources */,
 				0ED604F32091534200A4A81B /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -34,9 +34,6 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="14z-qn-aBi">
-                                <rect key="frame" x="177" y="323" width="20" height="20"/>
-                            </activityIndicatorView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="cna-54-xhu">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -98,7 +95,6 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="14z-qn-aBi" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="6Hi-6d-7N4"/>
                             <constraint firstItem="W3N-3D-zQM" firstAttribute="top" secondItem="4Rw-bg-phD" secondAttribute="bottom" constant="10" id="DyX-gI-EnI"/>
                             <constraint firstItem="cna-54-xhu" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="QXv-Ga-Ovt"/>
                             <constraint firstItem="W3N-3D-zQM" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="Yms-ij-wsK"/>
@@ -110,7 +106,6 @@
                             <constraint firstItem="0o3-4d-Dth" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="had-tK-Psf"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="0o3-4d-Dth" secondAttribute="trailing" constant="20" id="ji5-Sb-Ipb"/>
                             <constraint firstItem="0o3-4d-Dth" firstAttribute="top" secondItem="W3N-3D-zQM" secondAttribute="bottom" constant="2" id="nSa-Qm-0Ts"/>
-                            <constraint firstItem="14z-qn-aBi" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="psE-II-dIB"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="0o3-4d-Dth" secondAttribute="bottom" constant="20" id="rAh-3a-hDb"/>
                             <constraint firstItem="cna-54-xhu" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="vNx-XZ-Q29"/>
                         </constraints>
